@@ -82,15 +82,16 @@ def color_of(node:RB_Node)->RB_Node:
 
 
 def print_color_str(node :RB_Node)->None:
-        # grandpa, parent, l_uncle, r_uncle = all_relative(node)
+        grandpa, parent, l_uncle, r_uncle = all_relative(node)
 
         if node.rbnode_color == color.BLACK:
                 print(f"\033[1;30;40m {str(node)} \033[1;0;40m\n")
-                # print(f"爺爺: {grandpa}, 爸爸: {parent}, 左叔:{l_uncle}, 右叔:{r_uncle}" )
+                print(f"爺爺: {grandpa}, 爸爸: {parent}, 左叔:{l_uncle}, 右叔:{r_uncle}, 左子:{left_of(node)}, 右子{right_of(node)}" )
+
                 
         else:
                 print(f"\033[1;31;40m {str(node)} \033[1;0;40m\n")
-                # print(f"爺爺: {grandpa}, 爸爸: {parent}, 左叔:{l_uncle}, 右叔:{r_uncle}" )
+                print(f"爺爺: {grandpa}, 爸爸: {parent}, 左叔:{l_uncle}, 右叔:{r_uncle}" )
                 
         
 class RBTree_Traversal:
@@ -436,42 +437,24 @@ class RB_Tree:
         3. 如果刪除的節點有兩個子節點，要找到前驅或後繼節點
         '''
         def delete_node(self, node:RB_Node)->None:
-                # print("Remove node:", node)
-
-                # grandpa, parent, l_uncle, r_uncle = all_relative(node)
-                # print(f"爺爺: {grandpa}, 爸爸: {parent}, 左叔:{l_uncle}, 右叔:{r_uncle}" )
+                
                 
 
                 ## 3. node has two child
                 if node.left and node.right:
-                        # print("左右子樹都非空")
+                        
                         # successor = self.__find_successor(node)
                         predecessor = self.__find_predecessor(node)
-                        
-                        # grandpa, parent, l_uncle, r_uncle = all_relative(node)
-                        # print(f"Before 爺爺: {grandpa}, 爸爸: {parent}, 左叔:{l_uncle}, 右叔:{r_uncle}" )
-                        # print(f"left child: {left_of(node)}", f"right child: {right_of(node)}")
                         node.set_key(predecessor.rbnode_key)
                         node.set_value(predecessor.rbnode_value)
 
                         node = predecessor
-                        # grandpa, parent, l_uncle, r_uncle = all_relative(node)
-                        # print(f"After 爺爺: {grandpa}, 爸爸: {parent}, 左叔:{l_uncle}, 右叔:{r_uncle}" )
-                        # print(f"left child: {left_of(node)}", f"right child: {right_of(node)}")
                         
-                # grandpa, parent, l_uncle, r_uncle = all_relative(successor)
-                # print(f"爺爺: {grandpa}, 爸爸: {parent}, 左叔:{l_uncle}, 右叔:{r_uncle}" )
-
-                # grandpa, parent, l_uncle, r_uncle = all_relative(node)
-                # print(f"爺爺: {grandpa}, 爸爸: {parent}, 左叔:{l_uncle}, 右叔:{r_uncle}" )
-
                 replace_node = node.left if node.left else node.right
-                # print(replace_node)
 
                 ## 2
                 if replace_node:
-                        # print("只有一顆子樹非空")
-                        # 替代者的父親變成原來node的父親
+                        
                         replace_node.parent = node.parent
                         # node is root
                         if node.parent is None:
@@ -493,12 +476,10 @@ class RB_Tree:
 
                 # 刪除節點是根節點
                 elif node.parent is None:
-                        # print("只剩最後一個節點")
                         self.root = None
                 
                 ## 3 葉子節點 replace_node == None
                 else:
-                        # print("左右子樹都是空")
                         if node.rbnode_color == color.BLACK:
                                 self.fix_after_remove(node)
                                 
@@ -513,12 +494,6 @@ class RB_Tree:
 
 
         def fix_after_remove(self, x: RB_Node)->None:
-                # print(x)
-                # grandpa, parent, l_uncle, r_uncle = all_relative(x)
-                # print("爺爺", grandpa)
-                # print("爸爸", parent)
-                # print("左叔", l_uncle)
-                # print("右叔", r_uncle)
 
                 while x is not self.root and color_of(x) == color.BLACK:
 
@@ -535,7 +510,6 @@ class RB_Tree:
                                         r_node = right_of(parent_of(x))
 
                                 # 情況三，找兄弟借，兄弟沒得借
-                                # print("right brother", r_node)
                                 if ( (left_of(r_node) is None and right_of(r_node)  is None) or 
                                        ( left_of(r_node) and left_of(r_node).rbnode_color == color.BLACK and 
                                           right_of(r_node) and right_of(r_node).rbnode_color == color.BLACK) 
@@ -549,8 +523,8 @@ class RB_Tree:
                                 else: # 分兩種情況，兄弟節點本來是三節點或四節點
 
                                         # 右孩子為空
-                                        if right_of(r_node).rbnode_color == color.BLACK:
-                                                left_of(r_node).set_color(color.BLACK)
+                                        if right_of(r_node) and right_of(r_node).rbnode_color == color.BLACK:
+                                                if left_of(r_node) : left_of(r_node).set_color(color.BLACK)
                                                 r_node.set_color(color.RED)
                                                 self.__right_rotate(r_node)
                                                 r_node = right_of(parent_of(x))
@@ -558,7 +532,7 @@ class RB_Tree:
 
                                         r_node.set_color(parent_of(x).rbnode_color)
                                         parent_of(x).set_color(color.BLACK)
-                                        right_of(r_node).set_color(color.BLACK)
+                                        if right_of(r_node) : right_of(r_node).set_color(color.BLACK)
                                         self.__left_rotate(parent_of(x))
                                         x = self.root
 
@@ -578,7 +552,6 @@ class RB_Tree:
                                         # 找到真正的兄弟節點
                                         l_node = left_of(parent_of(x))
 
-                                # print("left brother", l_node)
                                 # 情況三，找兄弟借，兄弟沒得借
                                 if ( (right_of(l_node) is None and  left_of(l_node) is None) or 
                                      (right_of(l_node) and right_of(l_node).rbnode_color == color.BLACK and 
@@ -592,8 +565,8 @@ class RB_Tree:
                                 else: # 分兩種情況，兄弟節點本來是三節點或四節點
 
                                         # 右孩子為空
-                                        if left_of(l_node).rbnode_color == color.BLACK:
-                                                right_of(l_node).set_color(color.BLACK)
+                                        if left_of(l_node) and left_of(l_node).rbnode_color == color.BLACK:
+                                                if right_of(l_node) : right_of(l_node).set_color(color.BLACK)
                                                 l_node.set_color(color.RED)
                                                 self.__left_rotate(l_node)
                                                 l_node = left_of(parent_of(x))
@@ -601,7 +574,7 @@ class RB_Tree:
 
                                         l_node.set_color(parent_of(x).rbnode_color)
                                         parent_of(x).set_color(color.BLACK)
-                                        left_of(l_node).set_color(color.BLACK)
+                                        if left_of(l_node) : left_of(l_node).set_color(color.BLACK)
                                         self.__right_rotate(parent_of(x))
                                         x = self.root
 
@@ -619,7 +592,7 @@ class RB_Tree:
 if __name__ == "__main__":
         # test_list = [ 1, 5, 3, 2, 4, 8, 9, 7, 0, 6 ]
         test_insert_list = [ i for i in range(1, 11) ]
-        test_delete_list = [ 4, 5, 6, 8, 2, 10 ]
+        test_delete_list = [ 4, 5, 6, 8, 2, 10, 3, 9, 1, 7 ]
         rbt = RB_Tree()
 
         for i in test_insert_list:
@@ -628,11 +601,12 @@ if __name__ == "__main__":
         # RBTree_Traversal.inorder(rbt.root)
 
         for i in test_delete_list:
-                print(f"================ Before delete {i} ================")
-                RBTree_Traversal.levelorder(rbt.root)
+                # print(f"================ Before delete {i} ================")
+                # RBTree_Traversal.levelorder(rbt.root)
                 print(f"================ After delete {i} ================")
                 rbt.remove(key=i) 
                 RBTree_Traversal.levelorder(rbt.root)
+                # RBTree_Traversal.inorder(rbt.root)
                 
 
 
